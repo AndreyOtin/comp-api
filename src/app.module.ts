@@ -1,36 +1,47 @@
-import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
-import { ReportsModule } from './reports/reports.module';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UsersModule } from './users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User } from './users/entities/user.entity';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
-import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ProductModule } from './product/product.module';
+import { Product } from './product/entities/product.entity';
+import { Category } from './product/entities/category.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
 
 @Module({
   imports: [
-    ReportsModule,
+    ProductModule,
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env`,
+      envFilePath: `.env${process.env.NODE_ENV}`,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         return {
-          type: 'sqlite',
-          database: config.get<string>('DB_NAME'),
-          synchronize: true,
-          entities: [User, Report],
+          type: 'postgres',
+          synchronize: !!config.get('SYNC'),
+          autoLoadEntities: true,
+          host: config.get('HOST'),
+          port: Number(config.get('PORT')),
+          username: config.get('POSTGRES_USER'),
+          password: config.get('POSTGRES_PASSWORD'),
+          database: config.get('POSTGRES_DB'),
         };
       },
     }),
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [
@@ -39,11 +50,16 @@ const cookieSession = require('cookie-session');
       provide: APP_PIPE,
       useValue: new ValidationPipe({
         whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
       }),
     },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   constructor(private configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {

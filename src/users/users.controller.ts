@@ -7,15 +7,16 @@ import {
   Patch,
   Post,
   Query,
-  Session, UseGuards,
+  Session,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { UsersService } from './users.service';
+import { UsersService } from './services/users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserDto } from './dtos/user.dto';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { CurrentUser, SerializeResponse } from '../decorators/app';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 
 @Controller('users')
