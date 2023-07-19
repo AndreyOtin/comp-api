@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from './product.entity';
+import { Type } from './type.entity';
 
 @Entity()
 export class Category {
@@ -11,4 +12,8 @@ export class Category {
 
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
+
+  @ManyToMany(() => Type, { cascade: true })
+  @JoinTable()
+  types: Type[];
 }

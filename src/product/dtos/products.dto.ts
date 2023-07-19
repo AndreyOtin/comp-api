@@ -3,7 +3,7 @@ import { FindOptionsOrderValue } from 'typeorm';
 
 enum Sort {
   Asc = 'asc',
-  Desc = 'desc',
+  Desc = 'desc'
 }
 
 export class ProductsDto {
@@ -18,4 +18,8 @@ export class ProductsDto {
   @IsEnum(Sort)
   @IsOptional()
   priceSort: FindOptionsOrderValue;
+
+  @IsNumber()
+  @IsOptional()
+  category: number;
 }

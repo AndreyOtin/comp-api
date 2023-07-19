@@ -19,11 +19,23 @@ export class Product {
   @Column()
   price: number;
 
+  @Column({ nullable: true })
+  newPrice: number;
+
   @Column()
   image: string;
 
   @Column()
+  imageLarge: string;
+
+  @Column()
   inStock: boolean;
+
+  @Column()
+  isNew: boolean;
+
+  @Column()
+  isCustom: boolean;
 
   @ManyToOne(() => Category, (category) => category.products, { cascade: true })
   category: Category;

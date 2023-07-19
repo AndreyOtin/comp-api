@@ -21,6 +21,6 @@ export class Details {
   @Column()
   powerUnit: string;
 
-  @OneToMany(() => Product, (product) => product.category)
+  @OneToMany(() => Product, (product) => product.details)
   products: Product[];
 }

@@ -25,4 +25,19 @@ export class ProductController {
   getProductCategories() {
     return this.productsService.getProductCategories();
   }
+
+  @Get('/categories/:id')
+  getProductCategory(@Param('id') id: number) {
+    return this.productsService.getProductCategory(id);
+  }
+
+  @Get('/types')
+  getProductTypes() {
+    return this.productsService.getProductTypes();
+  }
+
+  @Get('/types/:id')
+  getProductType(@Param('id') id: number, @Query() query: ProductsDto) {
+    return this.productsService.getProductType(id, query.category);
+  }
 }

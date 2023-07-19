@@ -10,10 +10,8 @@ import { Details } from './entities/details.entity';
 import { Type } from './entities/type.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Product, Category, Brand, Spec, Details, Type]),
-  ],
+  imports: [TypeOrmModule.forFeature([Product, Category, Brand, Spec, Details, Type])],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService]
 })
 export class ProductModule {}

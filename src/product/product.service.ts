@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Between, Repository } from 'typeorm';
+import { Any, Between, IsNull, MoreThan, Not, Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { Details } from './entities/details.entity';
 import { ProductsDto } from './dtos/products.dto';
+import { Type } from './entities/type.entity';
 
 @Injectable()
 export class ProductService {
@@ -12,6 +13,7 @@ export class ProductService {
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(Category) private categoryRepo: Repository<Category>,
     @InjectRepository(Details) private detailsRepo: Repository<Details>,
+    @InjectRepository(Type) private typesRepo: Repository<Type>
   ) {}
 
   async getPriceRange() {
@@ -27,11 +29,11 @@ export class ProductService {
 
       const result = await this.productRepo.find({
         where: {
-          price: Between(min, max),
+          price: Between(min, max)
         },
         order: {
-          price: 'asc',
-        },
+          price: 'asc'
+        }
       });
 
       if (result.length) {
@@ -42,7 +44,7 @@ export class ProductService {
     return {
       totalMin,
       totalMax,
-      rangedProducts,
+      rangedProducts
     };
   }
 
@@ -51,37 +53,89 @@ export class ProductService {
       take: limit,
       skip: offset,
       order: {
-        price: priceSort,
+        price: priceSort
       },
+      relations: {
+        category: true,
+        type: true
+      },
+      select: {
+        category: {
+          name: true
+        },
+        type: {
+          name: true
+        }
+      }
     });
 
     return {
       count,
       limit,
       offset,
-      products,
+      products
     };
   }
 
   async getProduct(id: number) {
     return this.productRepo.find({
       where: {
-        id,
+        id
       },
       relations: {
         details: true,
-        spec: true,
-      },
+        spec: true
+      }
     });
   }
 
   async getProductCategories() {
     return this.categoryRepo.find({
       relations: {
-        products: {
-          brand: true,
-        },
+        types: true
       },
+      where: {
+        types: {
+          id: Not(IsNull())
+        }
+      }
+    });
+  }
+
+  async getProductCategory(id: number) {
+    return this.categoryRepo.find({
+      relations: {
+        products: true
+      },
+      where: {
+        id
+      }
+    });
+  }
+
+  async getProductTypes() {
+    return this.typesRepo.find({
+      relations: {
+        products: true
+      }
+    });
+  }
+
+  async getProductType(id: number, category?: number) {
+    return this.typesRepo.find({
+      relations: {
+        products: {
+          category: true
+        }
+      },
+      where: {
+        id,
+        products: {
+          category: {
+            id: category
+          }
+        }
+      }
     });
   }
 }
