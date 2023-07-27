@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Any, Between, IsNull, MoreThan, Not, Repository } from 'typeorm';
+import { Between, IsNull, Not, Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { Details } from './entities/details.entity';
 import { ProductsDto } from './dtos/products.dto';
 import { Type } from './entities/type.entity';
+import { Brand } from './entities/brand.entity';
 
 @Injectable()
 export class ProductService {
@@ -13,7 +14,8 @@ export class ProductService {
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(Category) private categoryRepo: Repository<Category>,
     @InjectRepository(Details) private detailsRepo: Repository<Details>,
-    @InjectRepository(Type) private typesRepo: Repository<Type>
+    @InjectRepository(Type) private typesRepo: Repository<Type>,
+    @InjectRepository(Brand) private brandsRepo: Repository<Brand>
   ) {}
 
   async getPriceRange() {
@@ -121,7 +123,7 @@ export class ProductService {
     });
   }
 
-  async getProductType(id: number, category?: number) {
+  async getProductType(id: number, query: ProductsDto) {
     return this.typesRepo.find({
       relations: {
         products: {
@@ -132,9 +134,17 @@ export class ProductService {
         id,
         products: {
           category: {
-            id: category
+            id: query.category
           }
         }
+      }
+    });
+  }
+
+  async getBrands() {
+    return this.brandsRepo.find({
+      relations: {
+        products: true
       }
     });
   }

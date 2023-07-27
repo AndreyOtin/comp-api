@@ -9,6 +9,9 @@ export class Brand {
   @Column({ unique: true })
   name: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @OneToMany(() => Product, (product) => product.brand)
   products: Product[];
 }

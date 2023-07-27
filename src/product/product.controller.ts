@@ -17,7 +17,7 @@ export class ProductController {
   }
 
   @Get('/range')
-  getProductRange(@Param('id') id: number) {
+  getProductRange() {
     return this.productsService.getPriceRange();
   }
 
@@ -38,6 +38,11 @@ export class ProductController {
 
   @Get('/types/:id')
   getProductType(@Param('id') id: number, @Query() query: ProductsDto) {
-    return this.productsService.getProductType(id, query.category);
+    return this.productsService.getProductType(id, query);
+  }
+
+  @Get('/brands')
+  getBrands() {
+    return this.productsService.getBrands();
   }
 }
