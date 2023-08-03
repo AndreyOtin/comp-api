@@ -8,7 +8,7 @@ import {
   Post,
   Query,
   Session,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './services/users.service';
@@ -18,14 +18,12 @@ import { AuthService } from './services/auth.service';
 import { CurrentUser, SerializeResponse } from '../decorators/app';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '../guards/auth.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 @Controller('users')
 @SerializeResponse(UserDto)
 export class UsersController {
-  constructor(
-    private userService: UsersService,
-    private authService: AuthService,
-  ) {}
+  constructor(private userService: UsersService, private authService: AuthService) {}
 
   @Post('/signin')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
@@ -37,10 +35,7 @@ export class UsersController {
 
   @Post('/signup')
   async authUser(@Body() body: CreateUserDto, @Session() session: any) {
-    const user = await this.authService.authenticateUser(
-      body.email,
-      body.password,
-    );
+    const user = await this.authService.authenticateUser(body.email, body.password);
     session.userId = user.id;
 
     return user;
@@ -57,21 +52,25 @@ export class UsersController {
     return user;
   }
 
+  @UseGuards(AdminGuard)
   @Get('/:id')
   async findUser(@Param('id') id: string) {
     return await this.userService.findOne(parseInt(id));
   }
 
+  @UseGuards(AdminGuard)
   @Get()
   async findUsers(@Query('email') email: string) {
     return await this.userService.find(email);
   }
 
+  @UseGuards(AuthGuard)
   @Delete('/:id')
   async deleteUser(@Param('id') id: string) {
     return await this.userService.remove(parseInt(id));
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id')
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     return await this.userService.update(parseInt(id), body);

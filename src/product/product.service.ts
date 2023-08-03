@@ -50,16 +50,18 @@ export class ProductService {
     };
   }
 
-  async getAll({ limit, offset, priceSort }: ProductsDto) {
+  async getAll({ limit, offset, priceSort, category, isNew, inStock, isCustom }: ProductsDto) {
     const [products, count] = await this.productRepo.findAndCount({
-      take: limit,
-      skip: offset,
-      order: {
-        price: priceSort
-      },
       relations: {
         category: true,
         type: true
+      },
+      where: {
+        category: {
+          id: category
+        },
+        isNew,
+        isCustom
       },
       select: {
         category: {
@@ -68,9 +70,15 @@ export class ProductService {
         type: {
           name: true
         }
-      }
+      },
+      order: {
+        price: priceSort,
+        inStock: inStock ? -1 : 1
+      },
+      take: limit,
+      skip: offset
     });
-
+    console.log(inStock);
     return {
       count,
       limit,

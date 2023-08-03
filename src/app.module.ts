@@ -1,19 +1,11 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  ValidationPipe,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from './users/entities/user.entity';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_PIPE } from '@nestjs/core';
 import { ProductModule } from './product/product.module';
-import { Product } from './product/entities/product.entity';
-import { Category } from './product/entities/category.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
@@ -24,7 +16,7 @@ const cookieSession = require('cookie-session');
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env${process.env.NODE_ENV}`,
+      envFilePath: `.env${process.env.NODE_ENV}`
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -37,11 +29,11 @@ const cookieSession = require('cookie-session');
           port: Number(config.get('PORT')),
           username: config.get('POSTGRES_USER'),
           password: config.get('POSTGRES_PASSWORD'),
-          database: config.get('POSTGRES_DB'),
+          database: config.get('POSTGRES_DB')
         };
-      },
+      }
     }),
-    ProductModule,
+    ProductModule
   ],
   controllers: [AppController],
   providers: [
@@ -53,11 +45,11 @@ const cookieSession = require('cookie-session');
         forbidNonWhitelisted: true,
         transform: true,
         transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    },
-  ],
+          enableImplicitConversion: true
+        }
+      })
+    }
+  ]
 })
 export class AppModule implements NestModule {
   constructor(private configService: ConfigService) {}
@@ -66,8 +58,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         cookieSession({
-          keys: [this.configService.get('COOKIE_KEY')],
-        }),
+          keys: [this.configService.get('COOKIE_KEY')]
+        })
       )
       .forRoutes('*');
   }

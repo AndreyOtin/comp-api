@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional } from 'class-validator';
 import { FindOptionsOrderValue } from 'typeorm';
 
 enum Sort {
@@ -22,4 +22,16 @@ export class ProductsDto {
   @IsNumber()
   @IsOptional()
   category: number;
+
+  @IsBoolean()
+  @IsOptional()
+  isNew: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  inStock: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isCustom: boolean;
 }
