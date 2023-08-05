@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, Not, Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { Details } from './entities/details.entity';
 import { ProductsDto } from './dtos/products.dto';
@@ -50,26 +50,41 @@ export class ProductService {
     };
   }
 
-  async getAll({ limit, offset, priceSort, category, isNew, inStock, isCustom }: ProductsDto) {
+  async getAll({
+    limit,
+    offset,
+    priceSort,
+    category,
+    isNew,
+    inStock,
+    isCustom,
+    brand,
+    price,
+    color,
+    type
+  }: ProductsDto) {
+    const prices = price && price.flatMap((el) => el.split('-').map((el) => Number(el)));
+
     const [products, count] = await this.productRepo.findAndCount({
       relations: {
         category: true,
-        type: true
+        type: true,
+        brand: true
       },
       where: {
+        type: {
+          id: type && In(type)
+        },
         category: {
-          id: category
+          id: category && In(category)
+        },
+        brand: {
+          id: brand && In(brand)
         },
         isNew,
-        isCustom
-      },
-      select: {
-        category: {
-          name: true
-        },
-        type: {
-          name: true
-        }
+        isCustom,
+        price: price && Between(Math.min(...prices), Math.max(...prices)),
+        color: color && In(color)
       },
       order: {
         price: priceSort,
@@ -78,7 +93,9 @@ export class ProductService {
       take: limit,
       skip: offset
     });
-    console.log(inStock);
+
+    console.log(brand);
+
     return {
       count,
       limit,
@@ -99,10 +116,11 @@ export class ProductService {
     });
   }
 
-  async getProductCategories() {
+  async getProductCategories({ isProducts }) {
     return this.categoryRepo.find({
       relations: {
-        types: true
+        types: true,
+        products: isProducts
       },
       where: {
         types: {
@@ -123,10 +141,10 @@ export class ProductService {
     });
   }
 
-  async getProductTypes() {
+  async getProductTypes({ isProducts }) {
     return this.typesRepo.find({
       relations: {
-        products: true
+        products: isProducts
       }
     });
   }
@@ -142,17 +160,17 @@ export class ProductService {
         id,
         products: {
           category: {
-            id: query.category
+            id: query.category && In(query.category)
           }
         }
       }
     });
   }
 
-  async getBrands() {
+  async getBrands({ isProducts }) {
     return this.brandsRepo.find({
       relations: {
-        products: true
+        products: isProducts
       }
     });
   }

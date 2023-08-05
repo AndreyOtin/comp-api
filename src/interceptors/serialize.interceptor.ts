@@ -7,14 +7,14 @@ export class SerializeInterceptor implements NestInterceptor {
 
   intercept(
     context: ExecutionContext,
-    next: CallHandler<any>,
+    next: CallHandler<any>
   ): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
       map((data) => {
         return plainToInstance(this.dto, data, {
-          excludeExtraneousValues: true,
+          excludeExtraneousValues: true
         });
-      }),
+      })
     );
   }
 }

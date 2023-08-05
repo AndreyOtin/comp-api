@@ -1,10 +1,5 @@
 import { Observable } from 'rxjs';
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { UsersService } from '../users/services/users.service';
 
 @Injectable()
@@ -13,7 +8,7 @@ export class CurrentUserInterceptor implements NestInterceptor {
 
   intercept(
     context: ExecutionContext,
-    next: CallHandler,
+    next: CallHandler
   ): Observable<any> | Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const id = request.session.userId;

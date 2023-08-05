@@ -22,8 +22,8 @@ export class ProductController {
   }
 
   @Get('/categories')
-  getProductCategories() {
-    return this.productsService.getProductCategories();
+  getProductCategories(@Query() query: ProductsDto) {
+    return this.productsService.getProductCategories(query);
   }
 
   @Get('/categories/:id')
@@ -32,8 +32,8 @@ export class ProductController {
   }
 
   @Get('/types')
-  getProductTypes() {
-    return this.productsService.getProductTypes();
+  getProductTypes(@Query() query: ProductsDto) {
+    return this.productsService.getProductTypes(query);
   }
 
   @Get('/types/:id')
@@ -42,7 +42,7 @@ export class ProductController {
   }
 
   @Get('/brands')
-  getBrands() {
-    return this.productsService.getBrands();
+  getBrands(@Query() query: ProductsDto) {
+    return this.productsService.getBrands(query);
   }
 }
