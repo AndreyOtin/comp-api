@@ -12,7 +12,4 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
-RUN npm prune --production
-
-CMD npx prisma migrate dev;npm run start
+CMD ["npm", "run", "start"]

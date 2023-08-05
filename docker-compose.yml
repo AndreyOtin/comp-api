@@ -15,7 +15,6 @@ services:
       - 3001:5555
     depends_on:
       - postgres
-    command: sh -c "npx prisma migrate dev && npm run start"
 
   postgres:
     image: postgres:12-alpine
