@@ -18,11 +18,26 @@ export class ProductService {
     @InjectRepository(Brand) private brandsRepo: Repository<Brand>
   ) {}
 
-  async getPriceRange() {
-    const totalMin = await this.productRepo.minimum('price');
-    const totalMax = await this.productRepo.maximum('price');
-    const rangedProducts = {} as Record<string, Product[]>;
+  async getPriceRange({ type, category, brand, isNew, isCustom, color, inStock }: ProductsDto) {
+    const findOptions = {
+      type: {
+        id: type && In(type)
+      },
+      category: {
+        id: category && In(category)
+      },
+      brand: {
+        id: brand && In(brand)
+      },
+      isNew,
+      isCustom,
+      inStock,
+      color: color && In(color)
+    };
 
+    const totalMin = await this.productRepo.minimum('price', findOptions);
+    const totalMax = await this.productRepo.maximum('price', findOptions);
+    const rangedProducts = {} as Record<string, Product[]>;
     const rangeCount = Math.round(totalMax / totalMin);
 
     for (let i = 1; i < rangeCount; i++) {
@@ -31,6 +46,7 @@ export class ProductService {
 
       const result = await this.productRepo.find({
         where: {
+          ...findOptions,
           price: Between(min, max)
         },
         order: {
@@ -93,8 +109,6 @@ export class ProductService {
       take: limit,
       skip: offset
     });
-
-    console.log(brand);
 
     return {
       count,
