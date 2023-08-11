@@ -15,7 +15,7 @@ export class User {
   @Column({ nullable: true })
   admin: boolean;
 
-  @OneToOne(() => Cart, (cart) => cart.user, { cascade: true, eager: true })
+  @OneToOne(() => Cart, (cart) => cart.user, { cascade: true, eager: true, onDelete: 'CASCADE' })
   @JoinColumn()
   cart: Cart;
 }

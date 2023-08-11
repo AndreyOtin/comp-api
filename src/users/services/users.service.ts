@@ -20,8 +20,9 @@ export class UsersService {
   async create(body: CreateUserDto) {
     const user = this.repo.create(body);
     user.cart = this.cartRepo.create();
+    await this.repo.save(user);
 
-    return this.repo.save(user);
+    return await this.findOne(user.id);
   }
 
   async findOne(id: number, where?: FindOptionsWhere<User>) {
