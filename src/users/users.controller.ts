@@ -19,9 +19,10 @@ import { CurrentUser, SerializeResponse } from '../decorators/app';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
+import { AddToCartDto, DeleteFromCartDto, UpdateCartDto } from './dtos/cart.dto';
 
-@Controller('users')
 @SerializeResponse(UserDto)
+@Controller('users')
 export class UsersController {
   constructor(private userService: UsersService, private authService: AuthService) {}
 
@@ -44,6 +45,21 @@ export class UsersController {
   @Post('/signout')
   async signOut(@Session() session: any) {
     session.userId = null;
+  }
+
+  @Post('/cart')
+  async addToCart(@Body() body: AddToCartDto, @Session() { userId }: { userId: number }) {
+    return await this.userService.addToCart(body, userId);
+  }
+
+  @Patch('/cart')
+  async updateCard(@Body() body: UpdateCartDto, @Session() { userId }: { userId: number }) {
+    return await this.userService.updateCard(body, userId);
+  }
+
+  @Delete('/cart')
+  async deleteFromCard(@Body() body: DeleteFromCartDto, @Session() { userId }: { userId: number }) {
+    return await this.userService.deleteFromCard(userId, body);
   }
 
   @Post('/info')

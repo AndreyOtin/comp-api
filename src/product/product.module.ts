@@ -12,6 +12,7 @@ import { Type } from './entities/type.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Product, Category, Brand, Spec, Details, Type])],
   controllers: [ProductController],
-  providers: [ProductService]
+  providers: [ProductService],
+  exports: [ProductService]
 })
 export class ProductModule {}

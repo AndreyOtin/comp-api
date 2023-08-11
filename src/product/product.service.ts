@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Between, In, IsNull, Not, Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import { Details } from './entities/details.entity';
 import { ProductsDto } from './dtos/products.dto';
 import { Type } from './entities/type.entity';
 import { Brand } from './entities/brand.entity';
+import { getFindOptions } from './utils/utils';
 
 @Injectable()
 export class ProductService {
@@ -18,25 +19,9 @@ export class ProductService {
     @InjectRepository(Brand) private brandsRepo: Repository<Brand>
   ) {}
 
-  async getPriceRange({ type, category, brand, isNew, isCustom, color, inStock }: ProductsDto) {
-    const findOptions = {
-      type: {
-        id: type && In(type)
-      },
-      category: {
-        id: category && In(category)
-      },
-      brand: {
-        id: brand && In(brand)
-      },
-      isNew,
-      isCustom,
-      inStock,
-      color: color && In(color)
-    };
-
-    const totalMin = await this.productRepo.minimum('price', findOptions);
-    const totalMax = await this.productRepo.maximum('price', findOptions);
+  async getPriceRange() {
+    const totalMin = await this.productRepo.minimum('price');
+    const totalMax = await this.productRepo.maximum('price');
     const rangedProducts = {} as Record<string, Product[]>;
     const rangeCount = Math.round(totalMax / totalMin);
 
@@ -46,7 +31,6 @@ export class ProductService {
 
       const result = await this.productRepo.find({
         where: {
-          ...findOptions,
           price: Between(min, max)
         },
         order: {
@@ -119,13 +103,32 @@ export class ProductService {
   }
 
   async getProduct(id: number) {
-    return this.productRepo.find({
+    if (Number.isNaN(id)) {
+      throw new BadRequestException();
+    }
+    console.log(id);
+    return this.productRepo.findOne({
       where: {
         id
       },
       relations: {
         details: true,
         spec: true
+      },
+      select: {
+        details: {
+          products: true,
+          cpu: true,
+          hdd: true,
+          ram: true,
+          video: true,
+          powerUnit: true
+        },
+        spec: {
+          cpu: true,
+          ioPorts: true,
+          featured: true
+        }
       }
     });
   }
@@ -145,6 +148,10 @@ export class ProductService {
   }
 
   async getProductCategory(id: number) {
+    if (Number.isNaN(id)) {
+      throw new BadRequestException();
+    }
+
     return this.categoryRepo.find({
       relations: {
         products: true
@@ -155,15 +162,27 @@ export class ProductService {
     });
   }
 
-  async getProductTypes({ isProducts }) {
+  async getProductTypes(query: ProductsDto) {
+    const options = getFindOptions(query);
+    delete options['type'];
+
     return this.typesRepo.find({
       relations: {
-        products: isProducts
+        products: query.isProducts
+      },
+      where: {
+        products: {
+          ...options
+        }
       }
     });
   }
 
   async getProductType(id: number, query: ProductsDto) {
+    if (Number.isNaN(id)) {
+      throw new BadRequestException();
+    }
+
     return this.typesRepo.find({
       relations: {
         products: {

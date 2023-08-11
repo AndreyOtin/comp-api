@@ -1,9 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
 import { Details } from './details.entity';
 import { Spec } from './spec.entity';
 import { Brand } from './brand.entity';
 import { Type } from './type.entity';
+import { ProductCart } from '../../users/entities/product-cart.entity';
 
 @Entity()
 export class Product {
@@ -51,4 +52,7 @@ export class Product {
 
   @ManyToOne(() => Spec, { cascade: true })
   spec: Spec;
+
+  @OneToMany(() => ProductCart, (productCart) => productCart.product)
+  public productCart: ProductCart[];
 }

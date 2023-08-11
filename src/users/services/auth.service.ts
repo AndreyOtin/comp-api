@@ -14,7 +14,7 @@ export class AuthService {
     const users = await this.userService.find(body.email);
 
     if (users.length) {
-      throw new BadRequestException('email in use');
+      throw new BadRequestException('Пользователь с таким емайл уже сущуствует');
     }
 
     const salt = randomBytes(4).toString('hex');
@@ -29,14 +29,14 @@ export class AuthService {
     const [user] = await this.userService.find(email);
 
     if (!user) {
-      throw new BadRequestException('no such user');
+      throw new BadRequestException('Нет такогопользователя');
     }
 
     const [salt, userPassword] = user.password.split('.');
     const result = (await scrypt(password, salt, 8)) as Buffer;
 
     if (userPassword !== result.toString('hex')) {
-      throw new BadRequestException('wrong password');
+      throw new BadRequestException('Неверный пароль');
     }
 
     return user;

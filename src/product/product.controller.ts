@@ -17,8 +17,8 @@ export class ProductController {
   }
 
   @Get('/range')
-  getProductRange(@Query() query: ProductsDto) {
-    return this.productsService.getPriceRange(query);
+  getProductRange() {
+    return this.productsService.getPriceRange();
   }
 
   @Get('/categories')
