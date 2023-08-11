@@ -70,7 +70,7 @@ export class UsersService {
 
   async addToCart(body: AddToCartDto, userId: number) {
     const user = await this.findOne(userId);
-
+    console.log(user);
     if (!user) {
       throw new NotFoundException('user not found');
     }
