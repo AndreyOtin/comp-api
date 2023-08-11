@@ -58,7 +58,10 @@ export class UsersController {
   }
 
   @Delete('/cart')
-  async deleteFromCard(@Body() body: DeleteFromCartDto, @Session() { userId }: { userId: number }) {
+  async deleteFromCard(
+    @Query() body: DeleteFromCartDto,
+    @Session() { userId }: { userId: number }
+  ) {
     return await this.userService.deleteFromCard(userId, body);
   }
 

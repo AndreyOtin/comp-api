@@ -31,11 +31,14 @@ export class UsersService {
     }
 
     const user = await this.repo.findOne({
-      relations: { cart: { productCart: true } },
+      relations: {
+        cart: { productCart: { product: { category: true, details: true, type: true } } }
+      },
       where: { id, ...where }
     });
 
     if (!user) {
+      console.log(1234);
       throw new NotFoundException('user not found');
     }
 
@@ -43,7 +46,12 @@ export class UsersService {
   }
 
   async find(email: string) {
-    return this.repo.find({ where: { email }, relations: { cart: true } });
+    return this.repo.find({
+      where: { email },
+      relations: {
+        cart: { productCart: { product: { category: true, details: true, type: true } } }
+      }
+    });
   }
 
   async update(id: number, attrs: Partial<User>) {
@@ -61,11 +69,11 @@ export class UsersService {
   }
 
   async addToCart(body: AddToCartDto, userId: number) {
-    const user = await this.repo.findOne({
-      where: {
-        id: userId
-      }
-    });
+    const user = await this.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
 
     const product = await this.productService.getProduct(body.productId);
 

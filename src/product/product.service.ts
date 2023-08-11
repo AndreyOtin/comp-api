@@ -106,7 +106,7 @@ export class ProductService {
     if (Number.isNaN(id)) {
       throw new BadRequestException();
     }
-    console.log(id);
+
     return this.productRepo.findOne({
       where: {
         id

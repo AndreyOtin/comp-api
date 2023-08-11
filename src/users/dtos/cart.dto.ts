@@ -14,4 +14,7 @@ export class UpdateCartDto extends IntersectionType(AddToCartDto) {
   transactionId: number;
 }
 
-export class DeleteFromCartDto extends PartialType(UpdateCartDto) {}
+export class DeleteFromCartDto {
+  @IsNumber()
+  transactionId: number;
+}
