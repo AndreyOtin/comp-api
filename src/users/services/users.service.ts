@@ -77,8 +77,8 @@ export class UsersService {
     const product = await this.productService.getProduct(body.productId);
 
     const cartProduct = this.productCartRepo.create({
-      product: product,
-      cart: user.cart,
+      cartId: user.cart.id,
+      productId: product.id,
       count: body.count,
       totalSum: body.count * (product.newPrice ? product.newPrice : product.price)
     });
