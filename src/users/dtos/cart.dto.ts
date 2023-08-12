@@ -1,4 +1,4 @@
-import { IntersectionType, PartialType } from '@nestjs/mapped-types';
+import { IntersectionType } from '@nestjs/mapped-types';
 import { IsNumber } from 'class-validator';
 
 export class AddToCartDto {

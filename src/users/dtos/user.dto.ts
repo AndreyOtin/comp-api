@@ -6,6 +6,9 @@ export class UserDto {
   email: string;
 
   @Expose()
+  token: string;
+
+  @Expose()
   @Transform(({ obj }: { obj: { cart: { productCart: ProductCart[] } } }) => {
     return {
       items: obj.cart.productCart.map((el) => ({

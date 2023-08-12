@@ -20,26 +20,56 @@ import { User } from './entities/user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
 import { AddToCartDto, DeleteFromCartDto, UpdateCartDto } from './dtos/cart.dto';
+import { sign } from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @SerializeResponse(UserDto)
 @Controller('users')
 export class UsersController {
-  constructor(private userService: UsersService, private authService: AuthService) {}
+  constructor(
+    private userService: UsersService,
+    private authService: AuthService,
+    private configService: ConfigService
+  ) {}
+
+  private signJWT(id: number, secret: string, role: 'USER' | 'ADMIN') {
+    return new Promise((res, rej) => {
+      sign(
+        {
+          id,
+          role,
+          issuedAt: new Date()
+        },
+        secret,
+        {
+          algorithm: 'HS256',
+          expiresIn: '24h'
+        },
+        (err, token) => {
+          if (err) {
+            rej(err);
+          }
+
+          res(token as string);
+        }
+      );
+    });
+  }
 
   @Post('/signin')
-  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+  async createUser(@Body() body: CreateUserDto) {
     const user = await this.authService.registerUser(body);
-    session.userId = user.id;
+    const token = await this.signJWT(user.id, this.configService.get('COOKIE_KEY'), 'USER');
 
-    return user;
+    return { ...user, token };
   }
 
   @Post('/signup')
-  async authUser(@Body() body: CreateUserDto, @Session() session: any) {
+  async authUser(@Body() body: CreateUserDto) {
     const user = await this.authService.authenticateUser(body.email, body.password);
-    session.userId = user.id;
+    const token = await this.signJWT(user.id, this.configService.get('COOKIE_KEY'), 'USER');
 
-    return user;
+    return { ...user, token };
   }
 
   @Post('/signout')
@@ -47,22 +77,22 @@ export class UsersController {
     session.userId = null;
   }
 
+  @UseGuards(AuthGuard)
   @Post('/cart')
-  async addToCart(@Body() body: AddToCartDto, @Session() { userId }: { userId: number }) {
-    return await this.userService.addToCart(body, userId);
+  async addToCart(@Body() body: AddToCartDto, @CurrentUser() user: User) {
+    return await this.userService.addToCart(body, user.id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/cart')
-  async updateCard(@Body() body: UpdateCartDto, @Session() { userId }: { userId: number }) {
-    return await this.userService.updateCard(body, userId);
+  async updateCard(@Body() body: UpdateCartDto, @CurrentUser() user: User) {
+    return await this.userService.updateCard(body, user.id);
   }
 
+  @UseGuards(AuthGuard)
   @Delete('/cart')
-  async deleteFromCard(
-    @Query() body: DeleteFromCartDto,
-    @Session() { userId }: { userId: number }
-  ) {
-    return await this.userService.deleteFromCard(userId, body);
+  async deleteFromCard(@Query() body: DeleteFromCartDto, @CurrentUser() user: User) {
+    return await this.userService.deleteFromCard(user.id, body);
   }
 
   @Post('/info')

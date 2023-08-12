@@ -8,6 +8,6 @@ export class AdminGuard implements CanActivate {
       return false;
     }
 
-    return request.user.admin;
+    return request.user?.role === 'ADMIN';
   }
 }

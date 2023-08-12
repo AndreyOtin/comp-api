@@ -1,11 +1,11 @@
-import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from "@nestjs/common";
-import { UsersModule } from "./users/users.module";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import { APP_PIPE } from "@nestjs/core";
-import { ProductModule } from "./product/product.module";
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { APP_PIPE } from '@nestjs/core';
+import { ProductModule } from './product/product.module';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
@@ -59,8 +59,8 @@ export class AppModule implements NestModule {
       .apply(
         cookieSession({
           keys: [this.configService.get('COOKIE_KEY')],
-          sameSite: 'none',
-          secure: false
+          sameSite: false,
+          httpOnly: false
         })
       )
       .forRoutes('*');
