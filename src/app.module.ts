@@ -59,7 +59,8 @@ export class AppModule implements NestModule {
       .apply(
         cookieSession({
           keys: [this.configService.get('COOKIE_KEY')],
-          sameSite: 'strict'
+          sameSite: 'none',
+          secure: false
         })
       )
       .forRoutes('*');
