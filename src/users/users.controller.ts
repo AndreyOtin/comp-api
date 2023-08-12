@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  Session,
   UseGuards
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -73,8 +72,8 @@ export class UsersController {
   }
 
   @Post('/signout')
-  async signOut(@Session() session: any) {
-    session.userId = null;
+  async signOut() {
+    return null;
   }
 
   @UseGuards(AuthGuard)
