@@ -29,7 +29,7 @@ export class AuthService {
     const [user] = await this.userService.find(email);
 
     if (!user) {
-      throw new BadRequestException('Нет такогопользователя');
+      throw new BadRequestException('Нет такого пользователя');
     }
 
     const [salt, userPassword] = user.password.split('.');
