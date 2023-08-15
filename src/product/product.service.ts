@@ -113,7 +113,9 @@ export class ProductService {
       },
       relations: {
         details: true,
-        spec: true
+        spec: true,
+        brand: true,
+        type: true
       },
       select: {
         details: {
@@ -137,7 +139,9 @@ export class ProductService {
     return this.categoryRepo.find({
       relations: {
         types: true,
-        products: isProducts
+        products: {
+          brand: isProducts
+        }
       },
       where: {
         types: {

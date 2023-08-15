@@ -32,7 +32,9 @@ export class UsersService {
 
     const user = await this.repo.findOne({
       relations: {
-        cart: { productCart: { product: { category: true, details: true, type: true } } }
+        cart: {
+          productCart: { product: { category: true, details: true, type: true, brand: true } }
+        }
       },
       where: { id, ...where }
     });

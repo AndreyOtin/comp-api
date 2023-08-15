@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.enableCors({
     credentials: true,
-    origin: [config.get('ORIGIN')]
+    origin: [config.get('ORIGIN'), 'http://91.201.41.167:3050']
   });
   app.use(compression());
 
