@@ -11,9 +11,9 @@ export class AuthService {
   constructor(private userService: UsersService) {}
 
   async registerUser(body: CreateUserDto) {
-    const users = await this.userService.find(body.email);
+    const user = await this.userService.find(body.email);
 
-    if (users.length) {
+    if (user) {
       throw new BadRequestException('Пользователь с таким емайл уже сущуствует');
     }
 
@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   async authenticateUser(email: string, password: string) {
-    const [user] = await this.userService.find(email);
+    const user = await this.userService.find(email);
 
     if (!user) {
       throw new BadRequestException('Нет такого пользователя');

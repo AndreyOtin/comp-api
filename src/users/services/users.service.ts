@@ -69,12 +69,27 @@ export class UsersService {
   }
 
   async find(email: string) {
-    return this.repo.find({
-      where: { email },
+    const user = await this.repo.findOne({
       relations: {
-        cart: { productCart: { product: { category: true, details: true, type: true } } }
-      }
+        cart: {
+          productCart: { product: { category: true, details: true, type: true, brand: true } }
+        }
+      },
+      where: { email, cart: { productCart: { isPaid: false } } }
     });
+
+    const userWithoutCart = await this.repo.findOne({
+      relations: {
+        cart: {
+          productCart: { product: { category: true, details: true, type: true, brand: true } }
+        }
+      },
+      where: { email }
+    });
+    console.log(userWithoutCart);
+    userWithoutCart.cart.productCart = [];
+
+    return user || userWithoutCart;
   }
 
   async update(id: number, attrs: Partial<User>) {
