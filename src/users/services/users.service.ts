@@ -63,7 +63,9 @@ export class UsersService {
       where: { id }
     });
 
-    userWithoutItems.cart.productCart = [];
+    if (userWithoutItems?.cart) {
+      userWithoutItems.cart.productCart = [];
+    }
 
     return user || userWithoutItems;
   }
