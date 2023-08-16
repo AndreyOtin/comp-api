@@ -86,8 +86,10 @@ export class UsersService {
       },
       where: { email }
     });
-    console.log(userWithoutCart);
-    userWithoutCart.cart.productCart = [];
+
+    if (userWithoutCart?.cart) {
+      userWithoutCart.cart.productCart = [];
+    }
 
     return user || userWithoutCart;
   }
