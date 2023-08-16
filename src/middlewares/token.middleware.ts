@@ -17,7 +17,12 @@ export class TokenMiddleware implements NestMiddleware {
         if (err) {
           next();
         } else if (payload) {
-          const user = payload.id && (await this.userService.findOne(payload.id));
+          const user =
+            payload.id &&
+            (await this.userService.findOne(payload.id, {
+              cart: { productCart: { isPaid: false } }
+            }));
+
           req.user = { ...user, token };
           next();
         }

@@ -1,5 +1,5 @@
 import { IntersectionType } from '@nestjs/mapped-types';
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AddToCartDto {
   @IsNumber()
@@ -17,4 +17,13 @@ export class UpdateCartDto extends IntersectionType(AddToCartDto) {
 export class DeleteFromCartDto {
   @IsNumber()
   transactionId: number;
+
+  @IsOptional()
+  @IsString()
+  secret: string;
+}
+
+export class OrderDto {
+  @IsString()
+  secret: string;
 }

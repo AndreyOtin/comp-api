@@ -26,6 +26,9 @@ export class ProductCart {
   @Column()
   public totalSum: number;
 
+  @Column({ nullable: false, default: false })
+  public isPaid: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

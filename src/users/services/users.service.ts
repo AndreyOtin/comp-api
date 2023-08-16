@@ -7,14 +7,25 @@ import { Cart } from '../entities/cart.entity';
 import { ProductCart } from '../entities/product-cart.entity';
 import { ProductService } from '../../product/product.service';
 import { AddToCartDto, DeleteFromCartDto, UpdateCartDto } from '../dtos/cart.dto';
+import Stripe from 'stripe';
+import { ConfigService } from '@nestjs/config';
+import { randomBytes } from 'crypto';
+
+const stripe = new Stripe(
+  'sk_test_51NfTN0GJUcoJ7LcsPBBFT00IX0zTfHSQaV6gtNyWxv0lvU7gUbDh475p9dnWS548WjNWRe0XVTGyMeug8cyq8NRR00WTtagnM8',
+  { apiVersion: '2022-11-15' }
+);
 
 @Injectable()
 export class UsersService {
+  secrets: Record<number, string> = {};
+
   constructor(
     @InjectRepository(User) private repo: Repository<User>,
     @InjectRepository(Cart) private cartRepo: Repository<Cart>,
     @InjectRepository(ProductCart) private productCartRepo: Repository<ProductCart>,
-    private productService: ProductService
+    private productService: ProductService,
+    private config: ConfigService
   ) {}
 
   async create(body: CreateUserDto) {
@@ -39,11 +50,22 @@ export class UsersService {
       where: { id, ...where }
     });
 
-    if (!user) {
+    if (!user && !where) {
       throw new NotFoundException('user not found');
     }
 
-    return user;
+    const userWithoutItems = await this.repo.findOne({
+      relations: {
+        cart: {
+          productCart: true
+        }
+      },
+      where: { id }
+    });
+
+    userWithoutItems.cart.productCart = [];
+
+    return user || userWithoutItems;
   }
 
   async find(email: string) {
@@ -69,6 +91,27 @@ export class UsersService {
     return this.repo.remove(user);
   }
 
+  async getPurchased(user: User) {
+    const products = await this.productCartRepo.find({
+      relations: {
+        product: {
+          category: true,
+          type: true,
+          brand: true,
+          details: true
+        }
+      },
+      where: {
+        cartId: user.cart.id,
+        isPaid: true
+      }
+    });
+
+    return {
+      products
+    };
+  }
+
   async addToCart(body: AddToCartDto, userId: number) {
     const user = await this.findOne(userId);
 
@@ -87,7 +130,7 @@ export class UsersService {
 
     await this.productCartRepo.save(cartProduct);
 
-    return await this.findOne(userId);
+    return await this.findOne(userId, { cart: { productCart: { isPaid: false } } });
   }
 
   async updateCard(body: UpdateCartDto, userId: number) {
@@ -109,7 +152,7 @@ export class UsersService {
       }
     );
 
-    return await this.findOne(userId);
+    return await this.findOne(userId, { cart: { productCart: { isPaid: false } } });
   }
 
   async deleteFromCard(userId: number, body: DeleteFromCartDto) {
@@ -119,6 +162,51 @@ export class UsersService {
       cartId: user.cart.id
     });
 
-    return await this.findOne(userId);
+    return await this.findOne(userId, { cart: { productCart: { isPaid: false } } });
+  }
+
+  async finishOrder(user: User, secret: string) {
+    if (secret !== this.secrets[user.id]) {
+      throw new BadRequestException('не верный ключ оплаты');
+    }
+
+    await this.productCartRepo.update({ cartId: user.cart.id }, { isPaid: true });
+
+    const newUser = await this.findOne(user.id, {
+      cart: { productCart: { isPaid: false } }
+    });
+
+    this.secrets[user.id] = null;
+
+    return newUser;
+  }
+
+  async makeOrder(user: User) {
+    const secret = randomBytes(10).toString('hex');
+    this.secrets[user.id] = secret;
+
+    const products = await this.productCartRepo.find({
+      where: {
+        cartId: user.cart.id,
+        isPaid: false
+      }
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer_email: user.email,
+      success_url: `${this.config.get('ORIGIN')}/home/cart?status=${secret}&?nav=purchased`,
+      cancel_url: `${this.config.get('ORIGIN')}/home/cart?status=cancel`,
+      line_items: products.map<Stripe.Checkout.SessionCreateParams.LineItem>((p) => ({
+        quantity: p.count,
+        price_data: {
+          unit_amount: (p.totalSum / p.count) * 100,
+          currency: 'usd',
+          product_data: { name: p.product.name }
+        }
+      }))
+    });
+
+    return { sessionId: session.id };
   }
 }

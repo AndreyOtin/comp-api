@@ -18,11 +18,11 @@ import { CurrentUser, SerializeResponse } from '../decorators/app';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
-import { AddToCartDto, DeleteFromCartDto, UpdateCartDto } from './dtos/cart.dto';
+import { AddToCartDto, DeleteFromCartDto, OrderDto, UpdateCartDto } from './dtos/cart.dto';
 import { sign } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { PurchasedDto } from './dtos/purchased.dto';
 
-@SerializeResponse(UserDto)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -55,6 +55,7 @@ export class UsersController {
     });
   }
 
+  @SerializeResponse(UserDto)
   @Post('/signin')
   async createUser(@Body() body: CreateUserDto) {
     const user = await this.authService.registerUser(body);
@@ -63,6 +64,7 @@ export class UsersController {
     return { ...user, token };
   }
 
+  @SerializeResponse(UserDto)
   @Post('/signup')
   async authUser(@Body() body: CreateUserDto) {
     const user = await this.authService.authenticateUser(body.email, body.password);
@@ -76,24 +78,49 @@ export class UsersController {
     return null;
   }
 
+  @SerializeResponse(PurchasedDto)
+  @UseGuards(AuthGuard)
+  @Get('/purchased')
+  async getPurchased(@CurrentUser() user: User) {
+    return await this.userService.getPurchased(user);
+  }
+
+  @SerializeResponse(UserDto)
   @UseGuards(AuthGuard)
   @Post('/cart')
   async addToCart(@Body() body: AddToCartDto, @CurrentUser() user: User) {
     return await this.userService.addToCart(body, user.id);
   }
 
+  @SerializeResponse(UserDto)
+  @UseGuards(AuthGuard)
+  @Post('/order')
+  async finishOrder(@CurrentUser() user: User, @Body() body: OrderDto) {
+    return await this.userService.finishOrder(user, body.secret);
+  }
+
+  @SerializeResponse(UserDto)
+  @UseGuards(AuthGuard)
+  @Get('/order')
+  async makeOrder(@CurrentUser() user: User) {
+    return await this.userService.makeOrder(user);
+  }
+
+  @SerializeResponse(UserDto)
   @UseGuards(AuthGuard)
   @Patch('/cart')
   async updateCard(@Body() body: UpdateCartDto, @CurrentUser() user: User) {
     return await this.userService.updateCard(body, user.id);
   }
 
+  @SerializeResponse(UserDto)
   @UseGuards(AuthGuard)
   @Delete('/cart')
   async deleteFromCard(@Query() body: DeleteFromCartDto, @CurrentUser() user: User) {
     return await this.userService.deleteFromCard(user.id, body);
   }
 
+  @SerializeResponse(UserDto)
   @Post('/info')
   @UseGuards(AuthGuard)
   async getInfo(@CurrentUser() user: User) {

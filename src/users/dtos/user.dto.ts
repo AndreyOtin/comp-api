@@ -9,9 +9,15 @@ export class UserDto {
   token: string;
 
   @Expose()
+  secret: string;
+
+  @Expose()
+  sessionId: string;
+
+  @Expose()
   @Transform(({ obj }: { obj: { cart: { productCart: ProductCart[] } } }) => {
     return {
-      items: obj.cart.productCart.map((el) => ({
+      items: obj.cart?.productCart?.map((el) => ({
         transactionId: el.transactionId,
         count: el.count,
         totalSum: el.totalSum,
